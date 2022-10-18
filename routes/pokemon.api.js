@@ -141,7 +141,8 @@ router.post("/", function (req, res, next) {
  descrpitions: update pokemon
 */
 
-router.put("/", function (req, res, next) {
+router.put("/:pokeId", function (req, res, next) {
+  const { pokeId } = req.params;
   const updates = req.body;
   const allowUpdate = ["name", "types", "url"];
   const pokemonTypes = [
@@ -229,7 +230,7 @@ router.delete("/:pokeId", function (req, res, next) {
     // data.slice(0, 10).map((item) => console.log(item.id));
 
     //Input Validation
-    const targetIndex = data.findIndex((item) => item.id === pokeId);
+    const targetIndex = data.findIndex((item) => item.id === parseInt(pokeId));
     // console.log(foundPokemon);
     if (targetIndex < 0) {
       const exception = new Error(`Pokemon not found`);
@@ -238,7 +239,7 @@ router.delete("/:pokeId", function (req, res, next) {
     }
 
     //Process & Save Data
-    data.filter((item) => item.id !== pokeId);
+    db.data = data.filter((item) => item.id !== parseInt(pokeId));
     fs.writeFileSync(("db.json", JSON.stringify(db)));
   } catch (error) {
     next(error);
