@@ -7,7 +7,7 @@ const router = express.Router();
  descrpitions: get all pokemons
 */
 
-router.get("/pokemons", function (req, res, next) {
+router.get("/", function (req, res, next) {
   const allowedFilter = ["search", "type", "page", "limit"];
   try {
     let db = JSON.parse(fs.readFileSync("db.json", "utf-8"));
@@ -43,7 +43,7 @@ router.get("/pokemons", function (req, res, next) {
  descrpitions: get single pokemon
 */
 
-router.get("/pokemons/:pokeId", function (req, res, next) {
+router.get("/:pokeId", function (req, res, next) {
   const { pokeId } = req.params;
   try {
     let db = JSON.parse(fs.readFileSync("db.json", "utf-8"));
@@ -70,7 +70,7 @@ router.get("/pokemons/:pokeId", function (req, res, next) {
  descrpitions: post pokemon
 */
 
-router.post("/pokemons", function (req, res, next) {
+router.post("/", function (req, res, next) {
   const pokemonTypes = [
     "bug",
     "dragon",
@@ -141,7 +141,7 @@ router.post("/pokemons", function (req, res, next) {
  descrpitions: update pokemon
 */
 
-router.put("/pokemons", function (req, res, next) {
+router.put("/", function (req, res, next) {
   const updates = req.body;
   const allowUpdate = ["name", "types", "url"];
   const pokemonTypes = [
@@ -220,14 +220,17 @@ router.put("/pokemons", function (req, res, next) {
  descrpitions: delete pokemon by id
 */
 
-router.delete("/pokemons/:pokeId", function (req, res, next) {
+router.delete("/:pokeId", function (req, res, next) {
   const { pokeId } = req.params;
+  //   console.log(req.params);
   try {
     let db = JSON.parse(fs.readFileSync("db.json", "utf-8"));
     let { data } = db;
+    // data.slice(0, 10).map((item) => console.log(item.id));
 
     //Input Validation
     const targetIndex = data.findIndex((item) => item.id === pokeId);
+    // console.log(foundPokemon);
     if (targetIndex < 0) {
       const exception = new Error(`Pokemon not found`);
       exception.statusCode = 404;
