@@ -6,7 +6,7 @@ const createData = async () => {
   let newData = await csv().fromFile("pokemon.csv");
   let data = JSON.parse(fs.readFileSync("db.json"));
 
-  newData = newData.map((e, i) => {
+  newData = newData.slice(0, 721).map((e, i) => {
     if (e.Type1 && e.Type2) {
       //lowercase to use mehod includes()
       let type1 = e.Type1.toLowerCase();
@@ -36,7 +36,7 @@ const createData = async () => {
       };
     }
   });
-  data.data = newData.slice(0, 722);
+  data.data = newData.slice(0, 721);
   let totalPokemon = newData.length;
   data.totalPokemon = totalPokemon;
   fs.writeFileSync("db.json", JSON.stringify(data));
