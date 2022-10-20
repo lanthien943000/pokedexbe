@@ -74,20 +74,37 @@ router.get("/:pokeId", function (req, res, next) {
   const { pokeId } = req.params;
   try {
     let db = JSON.parse(fs.readFileSync("db.json", "utf-8"));
-    let { data } = db;
+    let { data, totalPokemons } = db;
 
-    if (pokeId === "1") {
-      console.log(data[0]);
-      data = [data.slice(-1)[0], data[0], data[1]];
-    } else {
-      data = data.filter(
-        (item) =>
-          item.id === Number(pokeId) ||
-          item.id + 1 === Number(pokeId) ||
-          item.id - 1 === Number(pokeId)
-      );
+    let index = data.indexOf(
+      data.find((pokemon) => pokemon.id === parseInt(pokeId))
+    );
+
+    let datas;
+
+    switch (index) {
+      case 0:
+        datas = {
+          pokemon: data[0],
+          previousPokemon: data[totalPokemons - 1],
+          nextPokemon: data[1],
+        };
+        break;
+      case totalPokemons - 1:
+        datas = {
+          pokemon: data[totalPokemons - 1],
+          previousPokemon: data[totalPokemons - 2],
+          nextPokemon: data[0],
+        };
+        break;
+      default:
+        datas = {
+          pokemon: data[index],
+          previousPokemon: data[index - 1],
+          nextPokemon: data[index + 1],
+        };
     }
-    res.status(200).send({ data });
+    res.status(200).send({ datas });
   } catch (error) {
     next(error);
   }
