@@ -15,7 +15,7 @@ router.get("/", function (req, res, next) {
 
     let { page, limit, ...filterQuery } = req.query;
     page = parseInt(page) || 1;
-    limit = parseInt(limit) || 10;
+    limit = parseInt(limit) || 20;
     let offset = limit * (page - 1);
 
     const filterKeys = Object.keys(filterQuery);
@@ -27,13 +27,40 @@ router.get("/", function (req, res, next) {
       }
       //remove malicious query
       if (!filterQuery[key]) delete filterQuery[key];
-      if (key === "search" || key === "type") {
-        data = data.filter((item) => item.name.includes(filterQuery[key]));
-      }
     });
-    data = data.slice(offset, offset + limit);
 
-    res.status(200).send({ data });
+    let datas = [];
+    if (filterKeys.length) {
+      if (filterKeys.includes("search")) {
+        datas = datas.length
+          ? datas.filter((pokemon) =>
+              pokemon.name.includes(filterQuery.search.toLowerCase())
+            )
+          : data.filter((pokemon) =>
+              pokemon.name.includes(filterQuery.search.toLowerCase())
+            );
+      }
+      //filter by types
+      if (filterKeys.includes("type")) {
+        datas = datas.length
+          ? datas.filter((pokemon) =>
+              pokemon.types.some(
+                (el) => el.toLowerCase() === filterQuery.type.toLowerCase() // case insensitive search
+              )
+            )
+          : data.filter((pokemon) =>
+              pokemon.types.some(
+                (el) => el.toLowerCase() === filterQuery.type.toLowerCase()
+              )
+            );
+      }
+    } else {
+      datas = data;
+    }
+
+    datas = datas.slice(offset, offset + limit);
+
+    res.status(200).send({ datas });
   } catch (error) {
     next(error);
   }
@@ -178,23 +205,6 @@ router.put("/:pokeId", function (req, res, next) {
       throw exception;
     }
 
-    //types:
-    if (updates.types) {
-      types = types.split();
-      if (types.length > 2) {
-        const exception = new Error(`Pokémon can only have one or two types.`);
-        throw exception;
-      }
-      types.forEach((type) => {
-        if (pokemonTypes.includes(type)) {
-          return type;
-        } else {
-          const exception = new Error(`Pokémon’s type is invalid.`);
-          throw exception;
-        }
-      });
-    }
-
     //Processing data
     let db = JSON.parse(fs.readFileSync("db.json", "utf-8"));
     let { data } = db;
@@ -227,7 +237,7 @@ router.delete("/:pokeId", function (req, res, next) {
   try {
     let db = JSON.parse(fs.readFileSync("db.json", "utf-8"));
     let { data } = db;
-    // data.slice(0, 10).map((item) => console.log(item.id));
+    console.log(data);
 
     //Input Validation
     const targetIndex = data.findIndex((item) => item.id === parseInt(pokeId));
@@ -240,7 +250,8 @@ router.delete("/:pokeId", function (req, res, next) {
 
     //Process & Save Data
     db.data = data.filter((item) => item.id !== parseInt(pokeId));
-    fs.writeFileSync(("db.json", JSON.stringify(db)));
+    fs.writeFileSync("db.json", JSON.stringify(db));
+    res.status(200).send();
   } catch (error) {
     next(error);
   }
