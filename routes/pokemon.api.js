@@ -74,7 +74,7 @@ router.get("/:pokeId", function (req, res, next) {
   const { pokeId } = req.params;
   try {
     let db = JSON.parse(fs.readFileSync("db.json", "utf-8"));
-    let { data, totalPokemons } = db;
+    let { data, totalPokemon } = db;
 
     let index = data.indexOf(
       data.find((pokemon) => pokemon.id === parseInt(pokeId))
@@ -86,14 +86,14 @@ router.get("/:pokeId", function (req, res, next) {
       case 0:
         datas = {
           pokemon: data[0],
-          previousPokemon: data[totalPokemons - 1],
+          previousPokemon: data[totalPokemon - 1],
           nextPokemon: data[1],
         };
         break;
-      case totalPokemons - 1:
+      case totalPokemon - 1:
         datas = {
-          pokemon: data[totalPokemons - 1],
-          previousPokemon: data[totalPokemons - 2],
+          pokemon: data[totalPokemon - 1],
+          previousPokemon: data[totalPokemon - 2],
           nextPokemon: data[0],
         };
         break;
@@ -268,7 +268,7 @@ router.delete("/:pokeId", function (req, res, next) {
     //Process & Save Data
     db.data = data.filter((item) => item.id !== parseInt(pokeId));
     fs.writeFileSync("db.json", JSON.stringify(db));
-    res.status(200).send();
+    res.status(200).send({});
   } catch (error) {
     next(error);
   }
